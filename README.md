@@ -18,6 +18,8 @@ JWT authentication with password hashing through bcrypt.
 
 Logged-out visitors see the public Agricore website, registration/login, and partnership form.
 
+The top navigation includes a high-contrast `Login / Register` button that jumps directly to the access section.
+
 Logged-in admins see only the admin dashboard workspace.
 
 Logged-in users see only the user dashboard workspace.

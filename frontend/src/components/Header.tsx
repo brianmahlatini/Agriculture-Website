@@ -6,7 +6,6 @@ const navItems = [
   { label: 'Platform', href: '#platform' },
   { label: 'Operations', href: '#operations' },
   { label: 'Impact', href: '#impact' },
-  { label: 'Access', href: '#access' },
   { label: 'Partner', href: '#partner' }
 ];
 
@@ -28,8 +27,8 @@ export function Header() {
           </a>
         ))}
       </nav>
-      <a className="header-action" href="#partner">
-        <span>Start partnership</span>
+      <a className="header-action access-action" href="#access">
+        <span>Login / Register</span>
         <ArrowUpRight size={17} />
       </a>
       <button
