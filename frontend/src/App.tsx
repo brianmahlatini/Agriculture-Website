@@ -9,6 +9,7 @@ import { OperationsSection } from './components/OperationsSection';
 import { PartnerSection } from './components/PartnerSection';
 import { PlatformSection } from './components/PlatformSection';
 import { AuthSection } from './components/AuthSection';
+import { AiChatbot } from './components/AiChatbot';
 import { WorkspaceSection } from './components/WorkspaceSection';
 import { useAgricoreData } from './hooks/useAgricoreData';
 import { useAuth } from './hooks/useAuth';
@@ -21,6 +22,7 @@ function App() {
     return (
       <main id="top" className="authenticated-app">
         <WorkspaceSection user={user} onLogout={logout} />
+        <AiChatbot user={user} />
       </main>
     );
   }
@@ -39,6 +41,7 @@ function App() {
         <PartnerSection />
       </main>
       <Footer />
+      <AiChatbot />
     </>
   );
 }

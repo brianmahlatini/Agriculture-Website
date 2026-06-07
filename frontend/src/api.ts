@@ -273,3 +273,13 @@ export async function updateAdminBookingStatus(id: string, status: BookingStatus
     body: JSON.stringify({ status, adminNotes })
   });
 }
+
+export async function askAgricoreAssistant(payload: {
+  message: string;
+  context?: { role?: 'ADMIN' | 'USER'; page?: string };
+}) {
+  return requestJson<{ answer: string; configured: boolean; model?: string }>('/ai/chat', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}

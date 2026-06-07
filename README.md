@@ -1,6 +1,6 @@
 # Agricore Enterprise Agriculture Platform
 
-Agricore Enterprise Agriculture Platform is a full-stack agriculture company website and operating system with separate frontend and backend applications. It uses a React + TypeScript frontend, Node.js + Express backend, MongoDB, PostgreSQL, JWT authentication, role-based admin and user workspaces, booking workflows, and Docker Compose.
+Agricore Enterprise Agriculture Platform is a full-stack agriculture company website and operating system with separate frontend and backend applications. It uses a React + TypeScript frontend, Node.js + Express backend, MongoDB, PostgreSQL, JWT authentication, role-based admin and user workspaces, booking workflows, OpenAI-powered AI help, and Docker Compose.
 
 The goal of this project is to demonstrate senior full-stack engineering fundamentals for an agriculture business platform: secure authentication, first-user administrator bootstrap, role-aware dashboards, booking lifecycle management, admin operational visibility, structured PostgreSQL data, flexible MongoDB documents, validated API contracts, responsive frontend composition, and containerized local development.
 
@@ -15,6 +15,12 @@ React + TypeScript frontend built with Vite.
 Node.js + Express backend with modular routes, controllers, services, middleware, validators, and models.
 
 JWT authentication with password hashing through bcrypt.
+
+Enterprise AI chatbot powered by OpenAI's Responses API.
+
+AI assistant answers questions about Agricore, bookings, admin tools, user workflows, farm operations, crop forecasts, and sustainability reporting.
+
+OpenAI API keys stay server-side and are loaded through `OPENAI_API_KEY`.
 
 Logged-out visitors see the public Agricore website, registration/login, and partnership form.
 
@@ -225,6 +231,10 @@ bcryptjs password hashing
 
 jsonwebtoken JWT issuing and verification
 
+OpenAI Node SDK
+
+OpenAI Responses API
+
 Helmet security middleware
 
 CORS configuration
@@ -366,6 +376,7 @@ AGRICULTURE WEBSITE/
 
       controllers/
         adminController.js                          Admin metrics, users, and leads
+        aiController.js                             AI assistant response endpoint
         apiController.js                            Root API metadata response
         authController.js                           Register, login, and current-user APIs
         bookingsController.js                       User and admin booking behavior
@@ -392,6 +403,7 @@ AGRICULTURE WEBSITE/
 
       routes/
         admin.js                                    Admin-only API route mapping
+        ai.js                                       OpenAI-powered chatbot route mapping
         auth.js                                     Public auth and current user route mapping
         bookings.js                                 Authenticated user booking route mapping
         content.js                                  Content API route mapping
@@ -400,11 +412,13 @@ AGRICULTURE WEBSITE/
         operations.js                               Operations API route mapping
 
       services/
+        aiService.js                                OpenAI Responses API assistant service
         authService.js                              Password hashing, role assignment, JWT creation
         contentService.js                           Impact story seeding and reads
         operationsService.js                        PostgreSQL aggregation logic
 
       validators/
+        aiValidator.js                              Chatbot request contract
         authValidator.js                            Register and login request contracts
         bookingValidator.js                         Booking and admin status request contracts
         leadValidator.js                            Partnership lead request contract
@@ -426,6 +440,7 @@ AGRICULTURE WEBSITE/
       vite-env.d.ts                                 Vite TypeScript environment reference
 
       components/
+        AiChatbot.tsx                               Floating enterprise AI help assistant
         AdminDashboard.tsx                          Admin command dashboard
         AuthSection.tsx                             Register and login panel
         Footer.tsx                                  Footer and stack signal
@@ -580,6 +595,8 @@ POSTGRES_PASSWORD
 CORS_ORIGIN
 JWT_SECRET
 JWT_EXPIRES_IN
+OPENAI_API_KEY
+OPENAI_MODEL
 ```
 
 Important frontend environment variable:
@@ -589,6 +606,8 @@ VITE_API_URL
 ```
 
 Use a long rotated `JWT_SECRET`, managed database credentials, TLS, and production CORS origins outside local development.
+
+Use a rotated OpenAI API key in `OPENAI_API_KEY`. Never commit real API keys to Git or paste them into source files.
 
 ## Run With Docker
 
@@ -697,6 +716,28 @@ GET /api/health
 ```
 
 Returns API uptime plus MongoDB and PostgreSQL dependency status.
+
+### AI Assistant
+
+```text
+POST /api/ai/chat
+```
+
+Uses the backend `OPENAI_API_KEY` and OpenAI Responses API to answer Agricore platform questions.
+
+Example request:
+
+```json
+{
+  "message": "How do I create a booking?",
+  "context": {
+    "role": "USER",
+    "page": "user dashboard"
+  }
+}
+```
+
+If `OPENAI_API_KEY` is not configured, the route returns a setup message instead of breaking the app.
 
 ### Auth
 
@@ -839,6 +880,7 @@ Backend health endpoint returns ok.
 MongoDB reports connected.
 PostgreSQL reports connected.
 Browser console shows zero errors.
+AI chat route returns a safe setup message when no OpenAI key is configured.
 ```
 
 ## Senior Engineering Signals
@@ -888,6 +930,10 @@ Formatting helpers prevent duplicated number and percent formatting logic.
 Shared TypeScript types mirror backend response shapes.
 
 Admin and user dashboards are separated into dedicated components.
+
+OpenAI integration stays server-side so the browser never receives the API key.
+
+The AI assistant uses the Responses API and reads text from `response.output_text`.
 
 PostgreSQL initialization script creates schema and seed data automatically.
 

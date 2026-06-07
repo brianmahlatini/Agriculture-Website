@@ -18,5 +18,7 @@ export const env = {
   jwtSecret:
     process.env.JWT_SECRET ??
     'local-development-secret-change-before-production-please-use-a-managed-secret',
-  jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '8h'
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '8h',
+  openaiApiKey: process.env.OPENAI_API_KEY ?? '',
+  openaiModel: process.env.OPENAI_MODEL ?? 'gpt-5.5'
 };

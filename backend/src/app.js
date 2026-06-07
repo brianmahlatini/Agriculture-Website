@@ -4,6 +4,7 @@ import { getApiIndex } from './controllers/apiController.js';
 import { errorHandler, notFoundHandler } from './middleware/errorMiddleware.js';
 import { registerRequestMiddleware } from './middleware/requestMiddleware.js';
 import { adminRouter } from './routes/admin.js';
+import { aiRouter } from './routes/ai.js';
 import { authRouter } from './routes/auth.js';
 import { bookingsRouter } from './routes/bookings.js';
 import { contentRouter } from './routes/content.js';
@@ -19,6 +20,7 @@ export function createApp() {
   app.get('/api', getApiIndex);
 
   app.use('/api/health', healthRouter);
+  app.use('/api/ai', aiRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/bookings', bookingsRouter);
   app.use('/api/admin', adminRouter);

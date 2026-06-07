@@ -8,5 +8,6 @@ export const apiResources = [
   '/api/auth/login',
   '/api/auth/me',
   '/api/bookings',
-  '/api/admin/overview'
+  '/api/admin/overview',
+  '/api/ai/chat'
 ];
