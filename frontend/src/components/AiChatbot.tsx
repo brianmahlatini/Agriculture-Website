@@ -1,6 +1,6 @@
 // AI chatbot gives public visitors and signed-in users immediate Agricore platform help.
 import { FormEvent, useState } from 'react';
-import { Bot, Send, X } from 'lucide-react';
+import { Bot, RefreshCw, Send, X } from 'lucide-react';
 import { askAgricoreAssistant } from '../api';
 import type { AuthUser } from '../types';
 
@@ -14,23 +14,26 @@ type AiChatbotProps = {
 };
 
 const welcome =
-  'Hi, I am Agricore Assistant. Ask me about bookings, admin tools, farm operations, crop forecasts, sustainability reporting, or how to use this platform.';
+  'Hi, I am Agricore Assistant. Ask me anything about this platform, Agricore operations, bookings, dashboards, sustainability, crop forecasts, or general help.';
+
+const quickPrompts = [
+  'How do I create or cancel a booking?',
+  'What can an admin manage?',
+  'Explain Agricore crop forecasts.',
+  'Help me plan a farm assessment request.'
+];
 
 export function AiChatbot({ user }: AiChatbotProps) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([{ role: 'assistant', text: welcome }]);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const message = String(form.get('message')).trim();
-
+  async function sendMessage(rawMessage: string) {
+    const message = rawMessage.trim();
     if (!message) {
       return;
     }
 
-    event.currentTarget.reset();
     setMessages((current) => [...current, { role: 'user', text: message }]);
     setBusy(true);
 
@@ -56,6 +59,24 @@ export function AiChatbot({ user }: AiChatbotProps) {
     }
   }
 
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
+    const message = String(form.get('message')).trim();
+
+    if (!message) {
+      return;
+    }
+
+    formElement.reset();
+    void sendMessage(message);
+  }
+
+  function resetConversation() {
+    setMessages([{ role: 'assistant', text: welcome }]);
+  }
+
   return (
     <div className={open ? 'ai-chatbot open' : 'ai-chatbot'}>
       {open && (
@@ -65,9 +86,14 @@ export function AiChatbot({ user }: AiChatbotProps) {
               <strong>Agricore Assistant</strong>
               <span>{user ? `${user.role} support` : 'Enterprise help'}</span>
             </div>
-            <button type="button" aria-label="Close assistant" onClick={() => setOpen(false)}>
-              <X size={18} />
-            </button>
+            <div className="ai-chat-actions">
+              <button type="button" aria-label="Clear chat" onClick={resetConversation} disabled={busy}>
+                <RefreshCw size={17} />
+              </button>
+              <button type="button" aria-label="Close assistant" onClick={() => setOpen(false)}>
+                <X size={18} />
+              </button>
+            </div>
           </header>
           <div className="ai-chat-messages">
             {messages.map((item, index) => (
@@ -76,6 +102,13 @@ export function AiChatbot({ user }: AiChatbotProps) {
               </p>
             ))}
             {busy && <p className="ai-message assistant">Thinking...</p>}
+          </div>
+          <div className="ai-chat-quick-actions" aria-label="Quick assistant prompts">
+            {quickPrompts.map((prompt) => (
+              <button type="button" key={prompt} onClick={() => void sendMessage(prompt)} disabled={busy}>
+                {prompt}
+              </button>
+            ))}
           </div>
           <form className="ai-chat-form" onSubmit={handleSubmit}>
             <input name="message" type="text" placeholder="Ask about Agricore..." maxLength={1200} required />

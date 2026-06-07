@@ -6,6 +6,9 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
-    host: '0.0.0.0'
+    host: '0.0.0.0',
+    hmr: {
+      clientPort: Number(process.env.VITE_HMR_CLIENT_PORT ?? 5173)
+    }
   }
 });

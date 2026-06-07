@@ -18,7 +18,9 @@ JWT authentication with password hashing through bcrypt.
 
 Enterprise AI chatbot powered by OpenAI's Responses API.
 
-AI assistant answers questions about Agricore, bookings, admin tools, user workflows, farm operations, crop forecasts, and sustainability reporting.
+AI assistant answers broad user questions plus Agricore-specific questions about bookings, admin tools, user workflows, farm operations, crop forecasts, and sustainability reporting.
+
+AI chat includes quick prompts, a clear-chat action, plain-text responses, role-aware context, and safe fallback messaging when AI is not configured.
 
 OpenAI API keys stay server-side and are loaded through `OPENAI_API_KEY`.
 
@@ -51,6 +53,8 @@ MongoDB stores users, bookings, leads, and impact stories.
 PostgreSQL stores structured farm sites and crop forecast data.
 
 Docker Compose starts frontend, backend, MongoDB, and PostgreSQL together.
+
+Docker Compose maps Vite HMR to the public frontend port so browser development console output stays clean.
 
 Backend health endpoint reports MongoDB and PostgreSQL connectivity.
 
@@ -723,7 +727,7 @@ Returns API uptime plus MongoDB and PostgreSQL dependency status.
 POST /api/ai/chat
 ```
 
-Uses the backend `OPENAI_API_KEY` and OpenAI Responses API to answer Agricore platform questions.
+Uses the backend `OPENAI_API_KEY` and OpenAI Responses API to answer broad user questions and Agricore platform questions without exposing the key to the browser.
 
 Example request:
 
@@ -736,6 +740,8 @@ Example request:
   }
 }
 ```
+
+The floating frontend assistant includes visible quick prompts, normal typed questions, and a clear-chat action for resetting the conversation.
 
 If `OPENAI_API_KEY` is not configured, the route returns a setup message instead of breaking the app.
 
@@ -880,7 +886,10 @@ Backend health endpoint returns ok.
 MongoDB reports connected.
 PostgreSQL reports connected.
 Browser console shows zero errors.
+Docker Vite HMR connects through the mapped frontend port.
 AI chat route returns a safe setup message when no OpenAI key is configured.
+AI chat route returns a configured model response when `OPENAI_API_KEY` is present.
+AI chatbot UI supports clear chat and quick prompt actions.
 ```
 
 ## Senior Engineering Signals
