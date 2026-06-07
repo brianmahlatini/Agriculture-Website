@@ -1,8 +1,8 @@
 # Agricore Enterprise Agriculture Platform
 
-Agricore Enterprise Agriculture Platform is a full-stack agriculture company website and operating dashboard with separate frontend and backend applications. It uses a React + TypeScript frontend, Node.js + Express backend, MongoDB, PostgreSQL, Docker Compose, real agriculture media, and a clean enterprise folder structure.
+Agricore Enterprise Agriculture Platform is a full-stack agriculture company website and operating system with separate frontend and backend applications. It uses a React + TypeScript frontend, Node.js + Express backend, MongoDB, PostgreSQL, JWT authentication, role-based admin and user workspaces, booking workflows, and Docker Compose.
 
-The goal of this project is to demonstrate senior full-stack engineering fundamentals for an agriculture business platform: separate services, database-backed API design, structured operational data, flexible content storage, lead capture validation, responsive frontend composition, reusable components, environment-based configuration, containerized development, and a premium public-facing user experience for a leading agriculture company called Agricore.
+The goal of this project is to demonstrate senior full-stack engineering fundamentals for an agriculture business platform: secure authentication, first-user administrator bootstrap, role-aware dashboards, booking lifecycle management, admin operational visibility, structured PostgreSQL data, flexible MongoDB documents, validated API contracts, responsive frontend composition, and containerized local development.
 
 ## Features
 
@@ -14,7 +14,25 @@ React + TypeScript frontend built with Vite.
 
 Node.js + Express backend with modular routes, controllers, services, middleware, validators, and models.
 
-MongoDB stores flexible impact stories and enterprise partnership leads.
+JWT authentication with password hashing through bcrypt.
+
+First registered account automatically becomes the system ADMIN.
+
+All later registered accounts become USER accounts.
+
+Registration requires full name, username, email, company, and password.
+
+Login accepts username or email plus password.
+
+Admin dashboard can see platform metrics, users, leads, bookings, farm operations, and crop forecasts.
+
+Admin can update booking status across `REQUESTED`, `CONFIRMED`, `IN_PROGRESS`, `COMPLETED`, and `CANCELLED`.
+
+User dashboard can create farm service bookings.
+
+Users can view and cancel their own bookings.
+
+MongoDB stores users, bookings, leads, and impact stories.
 
 PostgreSQL stores structured farm sites and crop forecast data.
 
@@ -22,25 +40,21 @@ Docker Compose starts frontend, backend, MongoDB, and PostgreSQL together.
 
 Backend health endpoint reports MongoDB and PostgreSQL connectivity.
 
-Frontend API helper includes fallbacks so the UI still renders if the backend is temporarily unavailable.
+Frontend API helper persists JWT tokens and sends authenticated requests.
 
-Lead form validates data on the backend with Zod before saving to MongoDB.
-
-PostgreSQL initialization script seeds Agricore farm sites and crop forecasts.
+Zod validates auth, booking, lead, and admin booking status requests.
 
 Responsive navigation supports desktop and mobile layouts.
 
-Frontend code is split into reusable page sections, hooks, data files, and formatting utilities.
+Frontend code is split into reusable page sections, auth components, dashboard components, hooks, data files, and formatting utilities.
 
-Backend code is split into thin route files, controllers, service layers, database helpers, and middleware.
-
-Local dependencies are installed so VS Code can resolve React, TypeScript, Express, Mongoose, PostgreSQL, and Zod imports.
+Backend code is split into thin route files, controllers, service layers, database helpers, models, validators, and middleware.
 
 ## Screenshots
 
 ### Desktop Home
 
-Agricore desktop homepage with full-screen agriculture video, executive metrics, farm operations, impact stories, and partnership capture.
+Agricore desktop homepage with full-screen agriculture video, executive metrics, farm operations, impact stories, secure access, and partnership capture.
 
 ![Agricore desktop home](./agricore-home.png)
 
@@ -50,23 +64,87 @@ Agricore mobile layout with responsive navigation and optimized first-viewport c
 
 ![Agricore mobile home](./agricore-mobile.png)
 
-## Main User Experience
+## Roles
 
-Agricore is designed as an enterprise agriculture brand and operating platform.
+### Admin
 
-Visitors can:
+The first person to register becomes ADMIN automatically.
 
-View Agricore positioning and services.
+Admins can:
 
-Inspect high-level operating metrics.
+See platform-wide dashboard metrics.
 
-Review active farm sites and crop forecasts.
+See all registered users.
 
-Read sustainability and impact stories.
+See all enterprise partnership leads.
 
-Submit a partnership request.
+See all user bookings.
 
-Internal or future enterprise users can extend the same foundation into authenticated dashboards, farm management tools, procurement workflows, analytics, reporting, and admin operations.
+Update booking status.
+
+See operating farm and crop forecast data.
+
+Access all public website sections.
+
+### User
+
+Every registration after the first admin becomes USER automatically.
+
+Users can:
+
+Create service bookings.
+
+View their own bookings.
+
+Cancel active bookings.
+
+Track booking status.
+
+Access public Agricore content.
+
+Submit enterprise partnership requests.
+
+## Authentication Flow
+
+Registration accepts full name, username, email, company, and password.
+
+The backend controls role assignment:
+
+```text
+If no users exist:
+  first registered account becomes ADMIN
+
+If any user already exists:
+  new registered account becomes USER
+```
+
+Login accepts username or email and password.
+
+Security flow:
+
+```text
+React Register/Login Form
+        |
+        v
+Express Auth API
+        |
+        +--> Zod request validation
+        +--> bcrypt password hash/compare
+        +--> first-user ADMIN bootstrap
+        +--> JWT issued with user role
+        |
+        v
+React stores token in localStorage
+        |
+        v
+API helper sends Authorization: Bearer <token>
+        |
+        v
+Auth middleware validates token
+        |
+        v
+Role middleware protects admin routes
+```
 
 ## Tech Stack
 
@@ -84,9 +162,17 @@ CSS responsive layout
 
 Typed API helpers
 
+JWT token persistence in localStorage
+
 Reusable section components
 
+Custom auth hook
+
 Custom data-loading hook
+
+Admin dashboard components
+
+User booking workspace components
 
 Real remote agriculture media assets
 
@@ -100,7 +186,13 @@ Mongoose
 
 PostgreSQL `pg`
 
+MongoDB
+
 Zod validation
+
+bcryptjs password hashing
+
+jsonwebtoken JWT issuing and verification
 
 Helmet security middleware
 
@@ -135,7 +227,7 @@ Backend exposed on port 8080
 ```text
 React + TypeScript Frontend
         |
-        | HTTP API calls
+        | HTTP API calls with optional JWT
         v
 Node.js + Express API
         |
@@ -143,9 +235,10 @@ Node.js + Express API
         |                                                   |
         v                                                   v
 MongoDB                                             PostgreSQL
-Impact stories                                     Farm sites
-Partnership leads                                  Crop forecasts
-Flexible content                                   Structured operations
+Users                                               Farm sites
+Bookings                                            Crop forecasts
+Leads
+Impact stories
 ```
 
 ## Backend Flow
@@ -164,39 +257,60 @@ Express request middleware
         v
 Route file
         |
+        +--> Optional JWT authentication
+        +--> Optional ADMIN role guard
+        +--> Optional Zod validation
+        |
         v
 Controller
         |
         v
 Service or model
         |
-        +--> MongoDB for stories and leads
+        +--> MongoDB for users, bookings, leads, stories
         +--> PostgreSQL for operations and forecasts
         |
         v
 JSON response
 ```
 
-## Lead Capture Flow
+## Booking Flow
 
 ```text
-Visitor submits partnership form
+User creates booking
         |
         v
-POST /api/leads
+POST /api/bookings
         |
         v
-Zod validates request body
-        |
-        +--> invalid: 400 validation response
-        |
-        +--> valid: controller creates Lead document
+JWT verifies user
         |
         v
-MongoDB stores inquiry
+Zod validates booking request
         |
         v
-201 response returned to frontend
+MongoDB stores booking as REQUESTED
+        |
+        v
+Admin sees booking in dashboard
+        |
+        v
+Admin updates status
+```
+
+Cancellation flow:
+
+```text
+User selects active booking
+        |
+        v
+PATCH /api/bookings/{id}/cancel
+        |
+        v
+JWT verifies ownership
+        |
+        v
+Booking moves to CANCELLED
 ```
 
 ## Project Structure
@@ -204,6 +318,7 @@ MongoDB stores inquiry
 ```text
 AGRICULTURE WEBSITE/
   backend/
+    .dockerignore                                  Keeps backend Docker build context small
     Dockerfile                                      Container build for Node.js API
     package.json                                    Backend dependencies and scripts
     package-lock.json                               Locked backend dependency versions
@@ -219,7 +334,10 @@ AGRICULTURE WEBSITE/
         apiResources.js                             Public API route metadata
 
       controllers/
+        adminController.js                          Admin metrics, users, and leads
         apiController.js                            Root API metadata response
+        authController.js                           Register, login, and current-user APIs
+        bookingsController.js                       User and admin booking behavior
         contentController.js                        Impact story API behavior
         healthController.js                         API and database health response
         leadsController.js                          Partnership lead creation
@@ -230,28 +348,38 @@ AGRICULTURE WEBSITE/
         postgres.js                                 PostgreSQL pool and query helpers
 
       middleware/
+        authMiddleware.js                           JWT verification and admin role guard
         errorMiddleware.js                          Shared 404 and error JSON handling
         requestMiddleware.js                        Security, CORS, parsing, and logging
         validateRequest.js                          Zod request validation middleware
 
       models/
+        Booking.js                                  MongoDB booking schema
         ImpactStory.js                              MongoDB impact story schema
         Lead.js                                     MongoDB partnership lead schema
+        User.js                                     MongoDB user and role schema
 
       routes/
+        admin.js                                    Admin-only API route mapping
+        auth.js                                     Public auth and current user route mapping
+        bookings.js                                 Authenticated user booking route mapping
         content.js                                  Content API route mapping
         health.js                                   Health API route mapping
         leads.js                                    Lead API route mapping
         operations.js                               Operations API route mapping
 
       services/
+        authService.js                              Password hashing, role assignment, JWT creation
         contentService.js                           Impact story seeding and reads
         operationsService.js                        PostgreSQL aggregation logic
 
       validators/
+        authValidator.js                            Register and login request contracts
+        bookingValidator.js                         Booking and admin status request contracts
         leadValidator.js                            Partnership lead request contract
 
   frontend/
+    .dockerignore                                  Keeps frontend Docker build context small
     Dockerfile                                      Container build for Vite frontend
     index.html                                      HTML entry and favicon
     package.json                                    Frontend dependencies and scripts
@@ -260,13 +388,15 @@ AGRICULTURE WEBSITE/
     vite.config.ts                                  Vite dev server configuration
     src/
       main.tsx                                      React bootstrap
-      App.tsx                                       Page composition only
-      api.ts                                        Typed API helper and fallbacks
+      App.tsx                                       Page composition and auth-aware workspace switch
+      api.ts                                        Typed API helper, token store, auth calls
       styles.css                                    Global Agricore design system
       types.ts                                      Shared frontend response models
       vite-env.d.ts                                 Vite TypeScript environment reference
 
       components/
+        AdminDashboard.tsx                          Admin command dashboard
+        AuthSection.tsx                             Register and login panel
         Footer.tsx                                  Footer and stack signal
         Header.tsx                                  Brand navigation and mobile menu
         Hero.tsx                                    Video hero and primary CTAs
@@ -276,13 +406,16 @@ AGRICULTURE WEBSITE/
         OperationsSection.tsx                       PostgreSQL farm and forecast dashboard
         PartnerSection.tsx                          Partnership lead form
         PlatformSection.tsx                         Agricore capability messaging
+        UserDashboard.tsx                           User booking workspace
+        WorkspaceSection.tsx                        Role-aware workspace switch
 
       data/
         capabilities.ts                             Static capability copy
         media.ts                                    Centralized image and video URLs
 
       hooks/
-        useAgricoreData.ts                          Frontend data loading hook
+        useAgricoreData.ts                          Public page data loading hook
+        useAuth.ts                                  Auth session and token management hook
 
       utils/
         formatters.ts                               Shared number and percent formatting
@@ -331,16 +464,36 @@ updated_at
 
 ### MongoDB
 
-MongoDB stores flexible website content and inbound enterprise inquiries.
+MongoDB stores flexible application data.
 
-`impactstories`
+`users`
 
 ```text
-title
+username
+email
+passwordHash
+role
+fullName
+company
+status
+lastLoginAt
+createdAt
+updatedAt
+```
+
+`bookings`
+
+```text
+user
+service
+farmName
 region
-metric
-summary
-category
+hectares
+preferredDate
+notes
+status
+cancellationReason
+adminNotes
 createdAt
 updatedAt
 ```
@@ -355,6 +508,18 @@ acreage
 interest
 message
 source
+createdAt
+updatedAt
+```
+
+`impactstories`
+
+```text
+title
+region
+metric
+summary
+category
 createdAt
 updatedAt
 ```
@@ -382,6 +547,8 @@ POSTGRES_DB
 POSTGRES_USER
 POSTGRES_PASSWORD
 CORS_ORIGIN
+JWT_SECRET
+JWT_EXPIRES_IN
 ```
 
 Important frontend environment variable:
@@ -390,7 +557,7 @@ Important frontend environment variable:
 VITE_API_URL
 ```
 
-Use strong secrets, managed database credentials, and production CORS origins outside local development.
+Use a long rotated `JWT_SECRET`, managed database credentials, TLS, and production CORS origins outside local development.
 
 ## Run With Docker
 
@@ -442,7 +609,7 @@ docker compose down -v
 docker compose up --build
 ```
 
-This deletes local MongoDB and PostgreSQL data.
+This deletes local MongoDB and PostgreSQL data. After a clean volume reset, the next registration becomes the first ADMIN again.
 
 ## Local Frontend Commands
 
@@ -482,6 +649,8 @@ npm.cmd run lint     Runs syntax checks for app and server entry files
 #platform     Platform capabilities
 #operations   Farm sites and crop forecasts
 #impact       Sustainability and impact stories
+#access       Register and login
+#workspace    Admin or user workspace after login
 #partner      Enterprise partnership lead form
 ```
 
@@ -494,6 +663,75 @@ GET /api/health
 ```
 
 Returns API uptime plus MongoDB and PostgreSQL dependency status.
+
+### Auth
+
+```text
+POST /api/auth/register
+POST /api/auth/login
+GET  /api/auth/me
+```
+
+Register request:
+
+```json
+{
+  "username": "admin",
+  "email": "admin@agricore.test",
+  "password": "Password123",
+  "fullName": "Agricore Admin",
+  "company": "Agricore"
+}
+```
+
+Login request:
+
+```json
+{
+  "identifier": "admin",
+  "password": "Password123"
+}
+```
+
+### User Bookings
+
+```text
+GET   /api/bookings
+POST  /api/bookings
+PATCH /api/bookings/{id}/cancel
+```
+
+Booking request:
+
+```json
+{
+  "service": "Precision farm assessment",
+  "farmName": "Green Valley Estate",
+  "region": "Western Cape",
+  "hectares": 5000,
+  "preferredDate": "2026-07-15",
+  "notes": "Assess irrigation efficiency and crop forecasting."
+}
+```
+
+### Admin
+
+```text
+GET   /api/admin/overview
+GET   /api/admin/users
+GET   /api/admin/leads
+GET   /api/admin/bookings
+PATCH /api/admin/bookings/{id}/status
+```
+
+Admin status update:
+
+```json
+{
+  "status": "CONFIRMED",
+  "adminNotes": "Assigned to field operations team."
+}
+```
 
 ### Operations
 
@@ -519,19 +757,6 @@ POST /api/leads
 
 Creates a partnership request in MongoDB.
 
-Example request:
-
-```json
-{
-  "name": "Jane Mokoena",
-  "email": "jane@example.com",
-  "company": "Green Valley Foods",
-  "acreage": "5000 ha",
-  "interest": "Supply partnership",
-  "message": "We want to discuss a regional sourcing partnership."
-}
-```
-
 ## Verification
 
 The stack was verified with:
@@ -539,8 +764,8 @@ The stack was verified with:
 ```bash
 npm.cmd install
 npm.cmd run build
+npm.cmd run lint
 docker compose config
-docker compose build frontend backend
 docker compose up --build -d
 docker compose ps
 Invoke-RestMethod http://localhost:8080/api/health
@@ -557,6 +782,7 @@ Expected result:
 
 ```text
 React TypeScript production build succeeds.
+Frontend TypeScript no-emit check succeeds.
 Backend JavaScript syntax checks succeed.
 Docker Compose configuration is valid.
 MongoDB container starts.
@@ -576,9 +802,19 @@ Separate frontend and backend applications.
 
 Docker Compose reproduces the local environment.
 
+First-user admin bootstrap is controlled by the backend.
+
+Passwords are hashed with bcrypt.
+
+JWTs are issued by a dedicated auth service.
+
+JWT verification is centralized in auth middleware.
+
+Admin authorization is handled by role middleware.
+
 PostgreSQL is used for structured operational data.
 
-MongoDB is used for flexible content and lead capture.
+MongoDB is used for users, bookings, flexible content, and lead capture.
 
 Express route files are thin and delegate behavior to controllers.
 
@@ -594,23 +830,24 @@ CORS is configured from environment variables.
 
 Frontend sections are split into reusable components.
 
-Frontend data loading is centralized in a custom hook.
+Frontend auth session state is centralized in a custom hook.
+
+Frontend public data loading is centralized in a custom hook.
 
 Formatting helpers prevent duplicated number and percent formatting logic.
 
 Shared TypeScript types mirror backend response shapes.
 
-Fallback API data keeps the page useful during backend outages.
+Admin and user dashboards are separated into dedicated components.
 
 PostgreSQL initialization script creates schema and seed data automatically.
 
 Local dependency lockfiles support reproducible installs.
 
-The README documents architecture, routes, data storage, run commands, and verification.
+The README documents architecture, auth, roles, routes, data storage, run commands, and verification.
 
 ## Notes
 
 This is a portfolio-grade local development platform and a strong foundation for an enterprise agriculture product. It is not yet a hardened production deployment.
 
-Production improvements should include authentication, admin dashboards, role-based access control, rate limiting, audit logs, structured logging, distributed tracing, metrics dashboards, object storage for first-party media, a CDN, managed database backups, TLS, secret management, CI/CD, automated tests, image scanning, and production-grade MongoDB/PostgreSQL configurations.
-
+Production improvements should include refresh tokens, password reset, email verification, account lockout controls, audit logs, rate limiting, RBAC permissions beyond role names, admin user management actions, structured logging, distributed tracing, metrics dashboards, object storage for first-party media, a CDN, managed database backups, TLS, secret management, CI/CD, automated tests, image scanning, and production-grade MongoDB/PostgreSQL configurations.

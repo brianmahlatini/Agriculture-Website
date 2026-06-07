@@ -3,6 +3,10 @@ export const apiResources = [
   '/api/health',
   '/api/operations/overview',
   '/api/content/impact',
-  '/api/leads'
+  '/api/leads',
+  '/api/auth/register',
+  '/api/auth/login',
+  '/api/auth/me',
+  '/api/bookings',
+  '/api/admin/overview'
 ];
-

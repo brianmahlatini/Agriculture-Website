@@ -8,10 +8,14 @@ import { MetricsStrip } from './components/MetricsStrip';
 import { OperationsSection } from './components/OperationsSection';
 import { PartnerSection } from './components/PartnerSection';
 import { PlatformSection } from './components/PlatformSection';
+import { AuthSection } from './components/AuthSection';
+import { WorkspaceSection } from './components/WorkspaceSection';
 import { useAgricoreData } from './hooks/useAgricoreData';
+import { useAuth } from './hooks/useAuth';
 
 function App() {
   const { overview, stories, metrics } = useAgricoreData();
+  const { user, status, isAuthenticated, registerAccount, loginAccount, logout } = useAuth();
 
   return (
     <>
@@ -23,6 +27,11 @@ function App() {
         <OperationsSection overview={overview} />
         <MediaBand />
         <ImpactSection stories={stories} />
+        {isAuthenticated && user ? (
+          <WorkspaceSection user={user} onLogout={logout} />
+        ) : (
+          status !== 'checking' && <AuthSection onRegister={registerAccount} onLogin={loginAccount} />
+        )}
         <PartnerSection />
       </main>
       <Footer />
@@ -31,4 +40,3 @@ function App() {
 }
 
 export default App;
-

@@ -1,7 +1,50 @@
 // API client wraps backend calls and provides fallbacks so the UI remains useful during outages.
-import type { ImpactStory, OperationsOverview } from './types';
+import type {
+  AdminOverview,
+  AuthResponse,
+  AuthUser,
+  Booking,
+  BookingStatus,
+  ImpactStory,
+  OperationsOverview
+} from './types';
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:8080/api';
+const TOKEN_KEY = 'agricore.auth.token';
+
+export function getStoredToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+export function storeToken(token: string) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+export function clearStoredToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+async function requestJson<T>(path: string, options: RequestInit = {}): Promise<T> {
+  const token = getStoredToken();
+  const headers = new Headers(options.headers);
+  headers.set('Content-Type', 'application/json');
+
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
+
+  const response = await fetch(`${API_URL}${path}`, {
+    ...options,
+    headers
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({ error: 'Request failed' }));
+    throw new Error(body.error ?? 'Request failed');
+  }
+
+  return (await response.json()) as T;
+}
 
 export const fallbackOverview: OperationsOverview = {
   metrics: {
@@ -135,4 +178,72 @@ export async function submitLead(payload: Record<string, FormDataEntryValue>) {
   }
 
   return response.json();
+}
+
+export async function register(payload: {
+  username: string;
+  email: string;
+  password: string;
+  fullName: string;
+  company: string;
+}) {
+  const result = await requestJson<AuthResponse>('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  storeToken(result.token);
+  return result;
+}
+
+export async function login(payload: { identifier: string; password: string }) {
+  const result = await requestJson<AuthResponse>('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+  storeToken(result.token);
+  return result;
+}
+
+export async function getCurrentUser() {
+  return requestJson<{ user: AuthUser }>('/auth/me');
+}
+
+export async function getMyBookings() {
+  return requestJson<{ bookings: Booking[] }>('/bookings');
+}
+
+export async function createBooking(payload: {
+  service: string;
+  farmName: string;
+  region: string;
+  hectares: number;
+  preferredDate: string;
+  notes: string;
+}) {
+  return requestJson<{ booking: Booking }>('/bookings', {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function cancelBooking(id: string, reason: string) {
+  return requestJson<{ booking: Booking }>(`/bookings/${id}/cancel`, {
+    method: 'PATCH',
+    body: JSON.stringify({ reason })
+  });
+}
+
+export async function getAdminOverview() {
+  return requestJson<AdminOverview>('/admin/overview');
+}
+
+export async function getAdminBookings() {
+  return requestJson<{ bookings: Booking[] }>('/admin/bookings');
+}
+
+export async function updateAdminBookingStatus(id: string, status: BookingStatus, adminNotes = '') {
+  return requestJson<{ booking: Booking }>(`/admin/bookings/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status, adminNotes })
+  });
 }

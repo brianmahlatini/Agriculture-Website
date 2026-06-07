@@ -14,5 +14,9 @@ export const env = {
     user: process.env.POSTGRES_USER ?? 'agricore',
     password: process.env.POSTGRES_PASSWORD ?? 'agricore_password'
   },
-  corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173'
+  corsOrigin: process.env.CORS_ORIGIN ?? 'http://localhost:5173',
+  jwtSecret:
+    process.env.JWT_SECRET ??
+    'local-development-secret-change-before-production-please-use-a-managed-secret',
+  jwtExpiresIn: process.env.JWT_EXPIRES_IN ?? '8h'
 };

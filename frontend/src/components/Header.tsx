@@ -6,6 +6,8 @@ const navItems = [
   { label: 'Platform', href: '#platform' },
   { label: 'Operations', href: '#operations' },
   { label: 'Impact', href: '#impact' },
+  { label: 'Access', href: '#access' },
+  { label: 'Workspace', href: '#workspace' },
   { label: 'Partner', href: '#partner' }
 ];
 
@@ -42,4 +44,3 @@ export function Header() {
     </header>
   );
 }
-
