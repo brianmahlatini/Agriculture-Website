@@ -7,7 +7,6 @@ const navItems = [
   { label: 'Operations', href: '#operations' },
   { label: 'Impact', href: '#impact' },
   { label: 'Access', href: '#access' },
-  { label: 'Workspace', href: '#workspace' },
   { label: 'Partner', href: '#partner' }
 ];
 

@@ -500,6 +500,15 @@ h3 {
   background: #eef4ee;
 }
 
+.authenticated-app {
+  min-height: 100vh;
+  background: #eef4ee;
+}
+
+.authenticated-app .workspace-section {
+  min-height: 100vh;
+}
+
 .auth-section {
   display: grid;
   grid-template-columns: minmax(0, 0.75fr) minmax(320px, 0.55fr);

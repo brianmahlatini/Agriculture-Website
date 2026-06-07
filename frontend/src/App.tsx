@@ -17,6 +17,14 @@ function App() {
   const { overview, stories, metrics } = useAgricoreData();
   const { user, status, isAuthenticated, registerAccount, loginAccount, logout } = useAuth();
 
+  if (isAuthenticated && user) {
+    return (
+      <main id="top" className="authenticated-app">
+        <WorkspaceSection user={user} onLogout={logout} />
+      </main>
+    );
+  }
+
   return (
     <>
       <Header />
@@ -27,11 +35,7 @@ function App() {
         <OperationsSection overview={overview} />
         <MediaBand />
         <ImpactSection stories={stories} />
-        {isAuthenticated && user ? (
-          <WorkspaceSection user={user} onLogout={logout} />
-        ) : (
-          status !== 'checking' && <AuthSection onRegister={registerAccount} onLogin={loginAccount} />
-        )}
+        {status !== 'checking' && <AuthSection onRegister={registerAccount} onLogin={loginAccount} />}
         <PartnerSection />
       </main>
       <Footer />

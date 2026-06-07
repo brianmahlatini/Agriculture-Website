@@ -16,6 +16,12 @@ Node.js + Express backend with modular routes, controllers, services, middleware
 
 JWT authentication with password hashing through bcrypt.
 
+Logged-out visitors see the public Agricore website, registration/login, and partnership form.
+
+Logged-in admins see only the admin dashboard workspace.
+
+Logged-in users see only the user dashboard workspace.
+
 First registered account automatically becomes the system ADMIN.
 
 All later registered accounts become USER accounts.
@@ -135,6 +141,13 @@ If any user already exists:
 ```
 
 Login accepts username or email and password.
+
+After login, the public marketing sections are intentionally hidden. The app switches into a focused role workspace:
+
+```text
+ADMIN -> Admin control room only
+USER  -> User booking workspace only
+```
 
 Security flow:
 
@@ -668,9 +681,10 @@ npm.cmd run lint     Runs syntax checks for app and server entry files
 #operations   Farm sites and crop forecasts
 #impact       Sustainability and impact stories
 #access       Register and login
-#workspace    Admin or user workspace after login
 #partner      Enterprise partnership lead form
 ```
+
+Authenticated users do not see these public sections after login. They are routed into the role-specific workspace only.
 
 ## API Routes
 
