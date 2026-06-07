@@ -250,6 +250,23 @@ export async function getAdminBookings() {
   return requestJson<{ bookings: Booking[] }>('/admin/bookings');
 }
 
+export async function getAdminUsers() {
+  return requestJson<{ users: AuthUser[] }>('/admin/users');
+}
+
+export async function updateAdminUser(id: string, payload: Partial<Pick<AuthUser, 'role' | 'status'>>) {
+  return requestJson<{ user: AuthUser }>(`/admin/users/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
+  });
+}
+
+export async function deleteAdminUser(id: string) {
+  return requestJson<{ status: string }>(`/admin/users/${id}`, {
+    method: 'DELETE'
+  });
+}
+
 export async function updateAdminBookingStatus(id: string, status: BookingStatus, adminNotes = '') {
   return requestJson<{ booking: Booking }>(`/admin/bookings/${id}/status`, {
     method: 'PATCH',

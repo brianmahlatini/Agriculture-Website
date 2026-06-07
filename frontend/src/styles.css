@@ -668,6 +668,16 @@ h3 {
   grid-template-columns: 1fr 1.1fr 0.8fr 0.7fr 0.8fr;
 }
 
+.user-admin-row {
+  grid-template-columns: 1fr 1.2fr 0.65fr 0.75fr 0.7fr;
+}
+
+.user-admin-row strong {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .dashboard-row select {
   width: 100%;
   min-height: 40px;
@@ -720,6 +730,10 @@ h3 {
   opacity: 0.5;
 }
 
+.danger-action {
+  color: #87382e;
+}
+
 .secondary-dark-button {
   min-height: 44px;
   padding: 0 16px;
@@ -748,6 +762,83 @@ h3 {
 .compact-list span {
   margin-top: 4px;
   color: var(--muted);
+}
+
+.pipeline-list,
+.service-card-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.pipeline-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8faf5;
+}
+
+.pipeline-list strong {
+  color: var(--field);
+  font-size: 1.4rem;
+}
+
+.service-card-grid {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.service-card {
+  display: grid;
+  gap: 10px;
+  min-height: 170px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8faf5;
+}
+
+.service-card svg,
+.advisory-list svg {
+  color: var(--leaf);
+}
+
+.service-card span {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.advisory-list,
+.timeline-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.advisory-list span,
+.timeline-list span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #f8faf5;
+  font-weight: 800;
+}
+
+.timeline-list span {
+  position: relative;
+  color: var(--field);
+}
+
+.empty-state {
+  margin: 0;
+  padding: 18px;
+  color: var(--muted);
+  font-weight: 800;
 }
 
 .assurance-list {
@@ -882,6 +973,10 @@ h3 {
   .workspace-grid,
   .admin-grid,
   .admin-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .service-card-grid {
     grid-template-columns: 1fr;
   }
 

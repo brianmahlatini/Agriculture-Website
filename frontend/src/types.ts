@@ -49,6 +49,8 @@ export type AuthUser = {
   company: string;
   role: Role;
   status: 'ACTIVE' | 'SUSPENDED';
+  createdAt?: string;
+  updatedAt?: string;
 };
 
 export type AuthResponse = {

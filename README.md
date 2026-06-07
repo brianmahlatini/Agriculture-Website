@@ -76,11 +76,21 @@ See platform-wide dashboard metrics.
 
 See all registered users.
 
+Promote or demote user roles.
+
+Suspend or reactivate user accounts.
+
+Delete non-self user accounts and their bookings.
+
 See all enterprise partnership leads.
 
 See all user bookings.
 
 Update booking status.
+
+See booking pipeline status counts.
+
+See farm operations watch data and crop confidence signals.
 
 See operating farm and crop forecast data.
 
@@ -94,11 +104,17 @@ Users can:
 
 Create service bookings.
 
+Review recommended Agricore services.
+
+See next active booking guidance.
+
 View their own bookings.
 
 Cancel active bookings.
 
 Track booking status.
+
+Review the booking lifecycle from requested to completed.
 
 Access public Agricore content.
 
@@ -721,6 +737,8 @@ Booking request:
 ```text
 GET   /api/admin/overview
 GET   /api/admin/users
+PATCH /api/admin/users/{id}
+DELETE /api/admin/users/{id}
 GET   /api/admin/leads
 GET   /api/admin/bookings
 PATCH /api/admin/bookings/{id}/status
@@ -732,6 +750,15 @@ Admin status update:
 {
   "status": "CONFIRMED",
   "adminNotes": "Assigned to field operations team."
+}
+```
+
+Admin user update:
+
+```json
+{
+  "role": "USER",
+  "status": "ACTIVE"
 }
 ```
 
@@ -813,6 +840,10 @@ JWTs are issued by a dedicated auth service.
 JWT verification is centralized in auth middleware.
 
 Admin authorization is handled by role middleware.
+
+Admin user management prevents deleting or suspending the active admin account.
+
+Admin role changes protect against removing the last active admin.
 
 PostgreSQL is used for structured operational data.
 
