@@ -35,7 +35,8 @@ async function requestJson<T>(path: string, options: RequestInit = {}): Promise<
 
   const response = await fetch(`${API_URL}${path}`, {
     ...options,
-    headers
+    headers,
+    cache: 'no-store'
   });
 
   if (!response.ok) {
@@ -43,7 +44,13 @@ async function requestJson<T>(path: string, options: RequestInit = {}): Promise<
     throw new Error(body.error ?? 'Request failed');
   }
 
-  return (await response.json()) as T;
+  const text = await response.text();
+
+  if (!text) {
+    return {} as T;
+  }
+
+  return JSON.parse(text) as T;
 }
 
 export const fallbackOverview: OperationsOverview = {
@@ -142,13 +149,14 @@ export const fallbackStories: ImpactStory[] = [
 
 async function getJson<T>(path: string, fallback: T): Promise<T> {
   try {
-    const response = await fetch(`${API_URL}${path}`);
+    const response = await fetch(`${API_URL}${path}`, { cache: 'no-store' });
 
     if (!response.ok) {
       throw new Error(`API request failed: ${response.status}`);
     }
 
-    return (await response.json()) as T;
+    const text = await response.text();
+    return text ? (JSON.parse(text) as T) : fallback;
   } catch {
     return fallback;
   }
@@ -169,6 +177,7 @@ export async function getImpactStories() {
 export async function submitLead(payload: Record<string, FormDataEntryValue>) {
   const response = await fetch(`${API_URL}/leads`, {
     method: 'POST',
+    cache: 'no-store',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });

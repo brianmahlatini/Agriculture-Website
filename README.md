@@ -611,6 +611,8 @@ docker compose up --build
 
 This deletes local MongoDB and PostgreSQL data. After a clean volume reset, the next registration becomes the first ADMIN again.
 
+MongoDB stores users in a Docker volume. Restarting containers without `-v` keeps existing users, so the next registration will be a USER if an admin account already exists.
+
 ## Local Frontend Commands
 
 If you want to work on the React app outside Docker:

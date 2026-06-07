@@ -17,13 +17,16 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
   const [message, setMessage] = useState('');
 
   async function refresh() {
+    setMessage('');
     const [overviewResponse, bookingsResponse] = await Promise.all([getAdminOverview(), getAdminBookings()]);
     setOverview(overviewResponse);
     setBookings(bookingsResponse.bookings);
   }
 
   useEffect(() => {
-    void refresh().catch(() => setMessage('Unable to load admin data'));
+    void refresh().catch((error) =>
+      setMessage(error instanceof Error ? error.message : 'Unable to load admin data')
+    );
   }, []);
 
   async function changeStatus(booking: Booking, status: BookingStatus) {
@@ -62,6 +65,12 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
           </article>
         ))}
       </div>
+
+      {!overview && (
+        <div className="workspace-panel wide-panel">
+          <p className="form-note">{message || 'Loading admin command center...'}</p>
+        </div>
+      )}
 
       <div className="workspace-panel wide-panel">
         <h3>All bookings</h3>
@@ -119,4 +128,3 @@ export function AdminDashboard({ user }: AdminDashboardProps) {
     </section>
   );
 }
-
